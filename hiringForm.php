@@ -1,3 +1,16 @@
+<?php
+require 'functions.php';  // By Alazar
+require 'Database.php'; // By Alazar
+
+$config = require('config.php'); // By Alazar
+
+try {
+
+    $db = new Database($config['database'], 'root', $config['database']['password']);
+} catch (Exception $e) {
+    dd($e->getMessage());
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -31,18 +44,14 @@
                     <br>
                     <label for="hDate"> Hire Date:</label>
                     <?php
-                    require 'functions.php';  // By Alazar
-                    require 'Database.php'; // By Alazar
-
-                    $config = require('config.php'); // By Alazar
                     //---------------------------------------------------------------------
 
                     try {
-                        $db = new Database($config['database'], 'root', $config['database']['password']); // By Alazar
                         $sql = "select SYSDATE() as date";
-                        $result = mysqli_query($conn, $sql);
-                        if (mysqli_num_rows($result) > 0) {
-                            while ($row = mysqli_fetch_array($result)) {
+                        $nRows = $db->query('SELECT COUNT(*) FROM `date`')->fetchColumn();
+                        $result = $db->query($sql);
+                        if ($nRows > 0) {
+                            while ($row = $result->fetch()) {
                                 echo "<input type='date' name='hDate' readonly id='hireDate' value=" . $row['date'] . " />";
                             }
                         } else {
@@ -65,13 +74,8 @@
                         <label for="job">Job:</label>
                         <select name="jobDropdown" id="job">
                             <?php
-                            require 'functions.php';  // By Alazar
-                            require 'Database.php'; // By Alazar
 
-                            $config = require('config.php'); // By Alazar
-
-                            try {
-                                $db = new Database($config['database'], 'root', $config['database']['password']); // By Alazar
+                            try { // By Alazar
                                 //---------------------------------------------------------------------
 
                                 echo "<option selected='selected'></option>";
@@ -79,7 +83,7 @@
                                 $result = $db->query($sql);
 
                                 if ($result->rowCount() > 0) {
-                                    while ($row = $result->fetchAll()) {
+                                    while ($row = $result->fetch()) {
                                         echo "<option value='" . $row['job_id'] . "'>" . $row['job_title'] . "</option>";
                                     }
                                 } else {
@@ -97,28 +101,30 @@
                         <label for="manager">Manager:</label>
                         <select name="manager" id="managerDropdown">
                             <?php
-                            $servername = "localhost";
-                            $username = "root";
-                            $password = "";
-                            $dbname = "";
-                            $conn = mysqli_connect($servername, $username, $password, $dbname);
+
+
+                            /** Instead of creating one  */
+
                             //---------------------------------------------------------------------
-                            if (!$conn) {
-                                die("Connection failed: " . mysqli_connect_error());
+                            try {
+                                $db = new Database($config['database'], 'root', $config['database']['password']); // By Alazar
+
+                                echo "<option selected='selected'></option>";
+                                $sql = "select employees.employee_id, employees.first_name, employees.last_name, departments.department_name from 
+                                        employees join departments on departments.manager_id = employees.employee_id order by employee_id";
+                                $result = mysqli_query($conn, $sql);
+                                if (mysqli_num_rows($result) > 0) {
+                                    while ($row = mysqli_fetch_array($result)) {
+                                        echo "<option value='" . $row['employee_id'] . "'>" . $row['department_name'] . ':' . " " . $row['first_name'] . " " . $row['last_name'] . "</option>";
+                                    }
+                                } else {
+                                    echo "0 results";
+                                }
+                            } catch (Exception $e) {
+                                dd($e->getMessage());
                             }
 
-                            echo "<option selected='selected'></option>";
-                            $sql = "select employees.employee_id, employees.first_name, employees.last_name, departments.department_name from 
-                                        employees join departments on departments.manager_id = employees.employee_id order by employee_id";
-                            $result = mysqli_query($conn, $sql);
-                            if (mysqli_num_rows($result) > 0) {
-                                while ($row = mysqli_fetch_array($result)) {
-                                    echo "<option value='" . $row['employee_id'] . "'>" . $row['department_name'] . ':' . " " . $row['first_name'] . " " . $row['last_name'] . "</option>";
-                                }
-                            } else {
-                                echo "0 results";
-                            }
-                            mysqli_close($conn);
+
                             ?>
                         </select>
                     </div>
