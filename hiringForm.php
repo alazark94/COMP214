@@ -1,4 +1,9 @@
 <?php
+
+/** Instead of creating multiple instance for every request
+ * creating it once at the top and calling that instacne 
+ * for every query is much better.
+ */
 require 'functions.php';  // By Alazar
 require 'Database.php'; // By Alazar
 
@@ -79,10 +84,11 @@ try {
                                 //---------------------------------------------------------------------
 
                                 echo "<option selected='selected'></option>";
+                                $nRows = $db->query('SELECT COUNT(*) FROM `jobs`')->fetchColumn();
                                 $sql = "select * from jobs";
                                 $result = $db->query($sql);
 
-                                if ($result->rowCount() > 0) {
+                                if ($nRows > 0) {
                                     while ($row = $result->fetch()) {
                                         echo "<option value='" . $row['job_id'] . "'>" . $row['job_title'] . "</option>";
                                     }
@@ -102,19 +108,16 @@ try {
                         <select name="manager" id="managerDropdown">
                             <?php
 
-
-                            /** Instead of creating one  */
-
                             //---------------------------------------------------------------------
                             try {
-                                $db = new Database($config['database'], 'root', $config['database']['password']); // By Alazar
-
                                 echo "<option selected='selected'></option>";
                                 $sql = "select employees.employee_id, employees.first_name, employees.last_name, departments.department_name from 
                                         employees join departments on departments.manager_id = employees.employee_id order by employee_id";
-                                $result = mysqli_query($conn, $sql);
-                                if (mysqli_num_rows($result) > 0) {
-                                    while ($row = mysqli_fetch_array($result)) {
+                                $nRows = $db->query('SELECT COUNT(*) FROM 
+                                `employees` JOIN `departments` ON `departments.manager_id` = `employees.employee_id` ORDER BY `employee_id`')->fetchColumn();
+                                $result = $db->query($sql);
+                                if ($nRows > 0) {
+                                    while ($row = $result->fetch()) {
                                         echo "<option value='" . $row['employee_id'] . "'>" . $row['department_name'] . ':' . " " . $row['first_name'] . " " . $row['last_name'] . "</option>";
                                     }
                                 } else {
@@ -129,97 +132,80 @@ try {
                         </select>
                     </div>
                     <?php
-                    $servername = "localhost";
-                    $username = "root";
-                    $password = "";
-                    $dbname = "";
-                    $conn = mysqli_connect($servername, $username, $password, $dbname);
                     //---------------------------------------------------------------------
-                    if (!$conn) {
-                        die("Connection failed: " . mysqli_connect_error());
-                    }
-
-                    echo "<div class='department'>
+                    try {
+                        echo "<div class='department'>
                                     <label for='dep'>Department:</label>
                                     <select name='deptDropdown' id='dep'>
                                     <option selected=''selected'></option>";
-                    $sql = "select * from departments";
-                    $result = mysqli_query($conn, $sql);
-                    if (mysqli_num_rows($result) > 0) {
-                        while ($row = mysqli_fetch_array($result)) {
-                            echo "<option value='" . $row['department_id'] . "'>" . $row['department_name'] . "</option>";
+                        $sql = "select * from departments";
+                        $nRows = $db->query('SELECT COUNT(*) FROM `departments`')->fetchColumn();
+                        $result = $db->query($sql);
+                        if ($nRows > 0) {
+                            while ($row = $result->fetch()) {
+                                echo "<option value='" . $row['department_id'] . "'>" . $row['department_name'] . "</option>";
+                            }
+                        } else {
+                            echo "0 results";
                         }
-                    } else {
-                        echo "0 results";
-                    }
-                    echo "</select>
+                        echo "</select>
                                 <button type='submit' id='jobDescButton' name='getJobDesc'>Get Job Description</button>
                                 </div>";
-                    mysqli_close($conn);
+                    } catch (Exception $e) {
+                        dd($e->getMessage());
+                    }
                     ?>
                 </fieldset>
                 <input class="btn submit" type="submit" name="hireEmp" value="Hire" style="border-style: solid; cursor: pointer;" />
                 <input class="btn" type="reset" value="Cancel" style="color: red; border-style: solid; border-color: blue; cursor: pointer;" />
                 <?php
-                $servername = "localhost";
-                $username = "root";
-                $password = "";
-                $dbname = "";
-                $conn = mysqli_connect($servername, $username, $password, $dbname);
-                //---------------------------------------------------------------------
-                if (!$conn) {
-                    die("Connection failed: " . mysqli_connect_error());
-                }
 
-                if (isset($_POST['getJobDesc'])) {
-                    $departmentID = $_POST['deptDropdown'];
-                    echo "<br><table id='departmentTable'>
-                                <tr>
-                                <th>Department ID</th>
-                                <th>Department Name</th>
-                                </tr>";
-                    try {
+                try {
+                    if (isset($_POST['getJobDesc'])) {
+                        $departmentID = $_POST['deptDropdown'];
+                        echo "<br><table id='departmentTable'>
+                                    <tr>
+                                    <th>Department ID</th>
+                                    <th>Department Name</th>
+                                    </tr>";
+
                         $sql = "select * from departments where department_id = $departmentID";
-                        $result = mysqli_query($conn, $sql);
-                        if (mysqli_num_rows($result) > 0) {
-                            while ($row = mysqli_fetch_array($result)) {
+                        $nRows = $db->query('SELECT COUNT(*) FROM `department` WHERE `department_id` = ' . $departmentID)->fetchColumn();
+                        $result = $db->query($sql);
+                        if ($nRows > 0) {
+                            while ($row = $result->fetch()) {
                                 echo "<tr>
-                             <td>" . $row['department_id'] . " </td>
-                             <td>" . $row['department_name'] . "</td>
-                            </tr>";
+                                 <td>" . $row['department_id'] . " </td>
+                                 <td>" . $row['department_name'] . "</td>
+                                </tr>";
                             }
                         } else {
                             echo "0 results";
                         }
                         echo "</table>";
-                    } catch (Exception $e) {
-                        echo ("Unable to get department information: " . mysqli_error($conn));
                     }
-                }
 
-                if (isset($_POST['hireEmp'])) {
-                    $fName = $_POST['fName'];
-                    $lName = $_POST['lName'];
-                    $email = $_POST['email'];
-                    $phone = $_POST['phone'];
-                    $salary = $_POST['salary'];
-                    $hireDate = $_POST['hDate'];
-                    $jobID = $_POST['jobID'];
-                    $manID = $_POST['managerID'];
-                    $deptID = $_POST['depID'];
-                    if (empty($fName)) {
-                        echo "Name is empty";
-                    } else {
-                        try {
+                    if (isset($_POST['hireEmp'])) {
+                        $fName = $_POST['fName'];
+                        $lName = $_POST['lName'];
+                        $email = $_POST['email'];
+                        $phone = $_POST['phone'];
+                        $salary = $_POST['salary'];
+                        $hireDate = $_POST['hDate'];
+                        $jobID = $_POST['jobID'];
+                        $manID = $_POST['managerID'];
+                        $deptID = $_POST['depID'];
+                        if (empty($fName)) {
+                            echo "Name is empty";
+                        } else {
                             $sql = "CALL Employee_hire_sp('$fName', '$lName', '$email', '$phone','$salary', '$hireDate','$jobID', '$manID', '$deptID')";
-                            $result = mysqli_query($conn, $sql);
+                            $result = $db->query($sql);
                             echo "<br>Successfully created employee record for $fName $lName!";
-                        } catch (Exception $e) {
-                            echo ("Unable to create employee record: " . mysqli_error($conn));
                         }
                     }
+                } catch (Exception $e) {
+                    dd($e->getMessage());
                 }
-                mysqli_close($conn);
 
                 ?>
                 <input type='hidden' name='depID' id='deptIDField'>

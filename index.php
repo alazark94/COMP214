@@ -1,7 +1,8 @@
 <?php
 
+// Testing
+
 require 'functions.php';
-require 'config.php';
 require 'Database.php';
 
 $config = require('config.php');
