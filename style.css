@@ -1,0 +1,61 @@
+.flex-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 300px;
+}
+
+.flex-container > div {
+    width: 45%;
+    height: 20%;
+    text-align: center;
+    line-height: 300%;
+}
+
+h3 {
+    color: red;
+}
+
+.btn {
+    width: 10%;
+    font-size: 1.1rem;
+    font-family: "Times New Roman", Times, serif;
+}
+
+.job {
+    border-style: solid;
+    border-width: thin;
+    margin-bottom: 2rem;
+    height: 90px;
+}
+
+.manager {
+    border-style: solid;
+    border-width: thin;
+    margin-bottom: 2rem;
+    height: 90px;
+}
+
+.department {
+    border-style: solid;
+    border-width: thin;
+    margin-bottom: 2rem;
+    height: 90px;
+}
+
+table {
+    width: 50%;
+    border-collapse: collapse;
+    margin-left: 25%;
+}
+
+table,
+td,
+th {
+    border: 1px solid black;
+    padding: 5px;
+}
+
+#jobDesc {
+    width: 250px;
+}
