@@ -4,11 +4,12 @@
  * creating it once at the top and calling that instacne 
  * for every query is much better.
  */
-require 'functions.php';  // By Alazar
-require 'Database.php'; // By Alazar
+require 'functions.php';  // Added by KD
+require 'Database.php'; // By Added by KD
 
-$config = require('config.php'); // By Alazar
+$config = require('config.php'); // By Added by KD
 
+// will catch error whne DB connection failed 
 try {
 
     $db = new Database($config['database'], 'root', $config['database']['password']);
@@ -80,7 +81,7 @@ try {
                         <select name="jobDropdown" id="job">
                             <?php
 
-                            try { // By Alazar
+                            try { // Added by KD (exception)
                                 //---------------------------------------------------------------------
 
                                 echo "<option selected='selected'></option>";

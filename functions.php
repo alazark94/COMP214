@@ -1,3 +1,4 @@
+<!-- this will stop the process when error found  -->
 <?php
 
 function dd($value)
